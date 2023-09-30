@@ -7,13 +7,20 @@ interface ButtonClick {
   onSquareClick: () => void;
 }
 
+interface Restart {
+  onRestart: () => void;
+}
 
-const SquareButton: React.FC<ButtonClick> = ({value, onSquareClick}) =>{
+const SquareButton: React.FC<ButtonClick> = ({value, onSquareClick}) => {
   return <button className="square" onClick={onSquareClick} >{value}</button>;
 };
 
-const FindWinner: React.FC<any> = ({squares}): any => {
-  const lines:number[][]= [
+const RestartButton: React.FC<Restart> = ({onRestart}) => {
+  return <button className="restart" onClick={onRestart}>Restart</button>
+}
+
+function FindWinner(squares: string[]): string {
+  const lines: number[][] = [
     [0, 1, 2],
     [3, 4, 5],
     [6, 7, 8],
@@ -29,29 +36,34 @@ const FindWinner: React.FC<any> = ({squares}): any => {
     if ( squares[square1] == squares[square2] && squares[square1] == squares[square3] && squares[square2] == squares[square3])
       return (squares[square1]);
   }
-  return null;
+  return "";
 }
 
 export default function Board() {
   const [isXnext, setXnext] = useState<boolean>(true);
-  const [squares, setSquare] = useState<any>(Array(9).fill(null));
+  const [squares, setSquare] = useState<string[]>(Array(9).fill(""));
   const clickHandler = (i: number) => {
-    if (squares[i] || FindWinner(squares))
-    return ;
-  const copy = squares.slice();
-  if (isXnext)
-  copy[i] = 'X';
-else
+    if (squares[i] != "" || FindWinner(squares))
+      return ;
+    const copy = squares.slice();
+    if (isXnext)
+        copy[i] = 'X';
+    else
         copy[i] = 'O';
-      setSquare(copy);
-      setXnext(!isXnext);
-    }  
-  const winner:any = FindWinner(squares);
+    setSquare(copy);
+    setXnext(!isXnext);
+  }
+  const handleRestart = () => {
+    const copy = squares.slice();
+    copy.fill("");
+    setSquare(copy);
+  }  
+  const winner:string = FindWinner(squares);
   let status;
-  if (winner == 'X')
+  if (winner != "")
     status = "Winner is " + winner;
-  else if (winner == 'O')
-    status = "Winner is " + winner;
+  else
+    status = "The player is " + (isXnext ? 'X' : 'O');
   return (
     <>
       <div className="status">{status}</div>
@@ -69,6 +81,9 @@ else
         <SquareButton value={squares[6]} onSquareClick={() => clickHandler(6)}/>
         <SquareButton value={squares[7]} onSquareClick={() => clickHandler(7)}/>
         <SquareButton value={squares[8]} onSquareClick={() => clickHandler(8)}/>
+      </div>
+      <div className="restart button">
+        <RestartButton onRestart={handleRestart}></RestartButton>
       </div>
     </>
   );
